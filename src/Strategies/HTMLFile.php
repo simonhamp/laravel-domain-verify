@@ -47,7 +47,7 @@ class HTMLFile extends BaseStrategy
     protected function getHtmlFileToken($url)
     {
         $verificationName = config('domain_verifier.verification_name');
-        $urlFile = $url.'/'.$verificationName.'.html';
+        $urlFile = $url.'/.well-known/'.$verificationName.'.html';
 
         return $this->fileGetContents($urlFile);
     }
