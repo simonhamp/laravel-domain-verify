@@ -3,6 +3,7 @@
 namespace SunAsterisk\DomainVerifier\Strategies;
 
 use Spatie\Dns\Dns;
+use Spatie\Dns\Records\TXT;
 use SunAsterisk\DomainVerifier\Contracts\Models\DomainVerifiable;
 use SunAsterisk\DomainVerifier\DomainVerificationFacade;
 use SunAsterisk\DomainVerifier\Results\VerifyResult;
@@ -29,24 +30,21 @@ class DNSRecord extends BaseStrategy
         return new VerifyResult($domainVerifiable, $url, $record);
     }
 
-    protected function getTxtRecordValues($url)
+    protected function getTxtRecords($url)
     {
-        $dns = new Dns($url);
-        $txtRecords = $dns->getRecords('TXT');
-
-        if (preg_match_all('/"([^"]+)"/', $txtRecords, $m)) {
-            return $m[1];
-        }
-
-        return [];
+        $dns = new Dns();
+        return $dns->getRecords($url, DNS_TXT);
     }
 
     protected function tokenExists($url, $token)
     {
         $verificationName = config('domain_verifier.verification_name');
-        $txtRecordValues = $this->getTxtRecordValues($url);
         $verificationValue = "$verificationName=$token";
 
-        return in_array($verificationValue, $txtRecordValues);
+        return collect($this->getTxtRecords($url))
+            ->reject(function (TXT $record) use ($verificationValue) {
+                return $record->txt() !== $verificationValue;
+            })
+            ->isNotEmpty();
     }
 }
