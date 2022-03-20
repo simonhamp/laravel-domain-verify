@@ -17,7 +17,7 @@ class HTMLMeta extends BaseStrategy
      */
     public function verify(string $url, DomainVerifiable $domainVerifiable): VerifyResult
     {
-        $metaTags = $this->getMetaTags($url);
+        $metaTags = $this->getMetaTags($url) ?: [];
         $domainToken = $this->getMetaTagToken($metaTags);
         $record = DomainVerificationFacade::firstOrCreate($url, $domainVerifiable);
 
